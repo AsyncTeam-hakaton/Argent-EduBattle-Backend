@@ -1,0 +1,30 @@
+[project]
+name = "Argent-EduBattle-Backend"
+version = "1.0.0"
+description = "backend of Argent EduBattle​"
+requires-python = ">=3.10"
+dependencies = [
+    "dotenv>=0.9.9",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",          
+    "pytest-asyncio>=0.21.0", 
+    "ruff>=0.1.0",       
+]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "B", "I", "UP"]
+fixable = ["ALL"]
+allowed-confusables = []
+
+[tool.ruff.lint.bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends", "Depends"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
