@@ -1,0 +1,82 @@
+services:
+  ArgentCoreDB:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "2000:5432"
+    networks:
+      - edubattle-shared-network
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  argent-db-backuper:
+    image: prodrigestivill/postgres-backup-local:17
+    container_name: argent-db-backuper
+    restart: always
+    environment:
+      - POSTGRES_HOST=ArgentCoreDB       
+      - POSTGRES_CLUSTER=true
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_EXTRA_OPTS=-F c -b -v       
+      - SCHEDULE=@daily                      
+      - BACKUP_KEEP_DAYS=7   
+    networks:
+      - edubattle-shared-network                
+    volumes:
+      - ./backups:/var/postgresql/backup    
+    depends_on:
+      - ArgentCoreDB
+
+  argent-edubattle-backend:
+    build: .
+    ports:
+      - "2001:8000"
+    restart: always
+    environment:
+      - DB_HOST=ArgentCoreDB
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+    env_file:
+      - .env
+    depends_on:
+      - ArgentCoreDB
+      - redis
+    command: >
+      sh -c "export PYTHONPATH=/app && 
+            /app/.venv/bin/alembic upgrade head && 
+            /app/.venv/bin/python -m src.main"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - edubattle-shared-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: argent-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --save 60 1 --loglevel notice
+    ports:
+      - "2002:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - edubattle-shared-network
+    restart: always
+
+networks:
+  edubattle-shared-network:
+    external: true
+
+volumes:
+  pg_data:
+  redis_data:
