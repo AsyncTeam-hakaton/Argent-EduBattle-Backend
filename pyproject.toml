@@ -4,8 +4,11 @@ version = "1.0.0"
 description = "backend of Argent EduBattle​"
 requires-python = ">=3.10"
 dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.31.0",
     "dotenv>=0.9.9",
     "pydantic-settings>=2.15.0",
+    "sqlalchemy>=2.0.54",
 ]
 
 [dependency-groups]

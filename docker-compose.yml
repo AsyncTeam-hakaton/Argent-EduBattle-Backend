@@ -11,7 +11,7 @@ services:
     networks:
       - edubattle-shared-network
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql
 
   argent-db-backuper:
     image: prodrigestivill/postgres-backup-local:18
