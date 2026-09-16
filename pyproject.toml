@@ -5,6 +5,7 @@ description = "backend of Argent EduBattle​"
 requires-python = ">=3.10"
 dependencies = [
     "dotenv>=0.9.9",
+    "pydantic-settings>=2.15.0",
 ]
 
 [dependency-groups]
