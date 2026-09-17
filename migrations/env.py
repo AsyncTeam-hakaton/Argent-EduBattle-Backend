@@ -10,7 +10,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-import src.database.models  # noqa: F401
+import src.database.models.rooms_models
+import src.database.models.users_models  # noqa: F401
 from src.config import settings
 from src.database.base import Base
 
