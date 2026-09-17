@@ -51,3 +51,18 @@ class RoomParticipant(Base):
     )
 
     room: Mapped["Room"] = relationship(back_populates="participants")
+
+
+class RoomMatch(Base):
+    __tablename__ = "room_matches"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    room_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("rooms.id", ondelete="CASCADE"))
+
+    player1_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"))
+    player2_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"), nullable=True) # Nullable для автопрохода при нечетном кол-ве
+    
+    player1_score: Mapped[int] = mapped_column(default=0)
+    player2_score: Mapped[int] = mapped_column(default=0)
+    
+    winner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"), nullable=True)
