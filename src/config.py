@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    AI_API_KEY: str
+    AI_BASE_URL: str
+    AI_MODEL: str
+
     @property
     def DATABASE_URL_asynpg(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
