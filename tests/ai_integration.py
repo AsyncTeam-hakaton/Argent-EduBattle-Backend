@@ -37,8 +37,6 @@ async def test_live_gen_room_content():
         assert q.title != ""
         assert q.explanation != ""
 
-    print("\n\nУспешно сгенерировано!")
-    print(f"Главная тема: {result.lecture.topic_title}")
-    print(f"Первый вопрос допуска: {result.qualification_questions[0].title}")
-    print(f"Варианты: {result.qualification_questions[0].options}")
-    print(f"Правильный индекс: {result.qualification_questions[0].correct_idx}")
+    print("\n" + "="*50)
+    print(result.model_dump_json(indent=2))
+    print("="*50)
