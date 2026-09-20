@@ -34,7 +34,9 @@ class Room(Base):
         nullable=False
     )
 
-    questions: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+    lecture: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    qualification_questions: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB, nullable=True)
+    quiz_questions: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB, nullable=True)
 
     participants: Mapped[list["RoomParticipant"]] = relationship(back_populates="room")
 
