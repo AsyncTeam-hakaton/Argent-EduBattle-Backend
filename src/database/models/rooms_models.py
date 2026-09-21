@@ -66,5 +66,3 @@ class RoomMatch(Base):
 
     player1_score: Mapped[int] = mapped_column(default=0)
     player2_score: Mapped[int] = mapped_column(default=0)
-    
-    winner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"))
