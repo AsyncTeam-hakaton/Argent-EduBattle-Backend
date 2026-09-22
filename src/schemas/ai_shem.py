@@ -28,4 +28,4 @@ class RoomFullContent(BaseModel):
     )
 
 class ask_result(BaseModel):
-    res: str = Field(description="текст ответа")
+    response: str = Field(description="текст ответа")
