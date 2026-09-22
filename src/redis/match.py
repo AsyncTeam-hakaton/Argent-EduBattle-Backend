@@ -42,4 +42,13 @@ class MatchService:
             await pipe.execute()
 
         logger.info("🎮 Матч для комнаты %s успешно инициализирован в Redis.", match_data.room_id)
+
+    async def add_score(self, room_id: int, user_id: int, points: int = 1) -> int:
+        scores_key = self._get_scoresfff_key(room_id)
+        return await self.redis.hincrby(scores_key, str(user_id), points)
+
+    async def get_opponent_id(self, room_id: int, user_id: int) -> int | None:
+        pairs_key = self._get_pairs_key(room_id)
+        opponent_id = await self.redis.hget(pairs_key, str(user_id))
+        return int(opponent_id) if opponent_id else None 
         
