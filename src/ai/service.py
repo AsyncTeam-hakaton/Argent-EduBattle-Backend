@@ -1,7 +1,7 @@
 from src.ai.client import ai_client
-from src.ai.prompts import SYSTEM_QUIZ_GENERATOR_PROMPT
+from src.ai.prompts import SYSTEM_CHAT_ASSIST, SYSTEM_QUIZ_GENERATOR_PROMPT
 from src.config import settings
-from src.schemas.ai_shem import RoomFullContent
+from src.schemas.ai_shem import RoomFullContent, ask_result
 
 
 class AIService:
@@ -21,4 +21,15 @@ class AIService:
         )
         return response.choices[0].message.parsed
 
+    async def ask_assistent(self, question: str) -> ask_result:
+        response = await self.client.beta.chat.completions.parse(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": SYSTEM_CHAT_ASSIST},
+                {"role": "user", "content": question},
+            ],
+            response_format=ask_result,
+        )
+        return response.choices[0].message.parsed
+    
 ai_service = AIService()

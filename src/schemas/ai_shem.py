@@ -26,3 +26,6 @@ class RoomFullContent(BaseModel):
     quiz_questions: list[Question] = Field(
         description="7-10 продвинутых/сложных вопросов по теме(приоритет по материалу лекции). Не дублировать вопросы из квалификации!"
     )
+
+class ask_result(BaseModel):
+    res: str = Field(description="текст ответа")
