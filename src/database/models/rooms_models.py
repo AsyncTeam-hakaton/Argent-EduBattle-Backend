@@ -1,4 +1,5 @@
 import enum
+import secrets
 from typing import Any
 
 from sqlalchemy import BigInteger, ForeignKey, String
@@ -20,11 +21,14 @@ class ParticipantStatus(str, enum.Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
 
+def gen_invite_code() -> str:
+    return f"{secrets.randbelow(1000000):06d}"
+
 class Room(Base):
     __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(BigInteger,primary_key=True)
-    code: Mapped[str] = mapped_column(String(8), unique=True, index=True)
+    code: Mapped[str] = mapped_column(String(6), unique=True, index=True, default=gen_invite_code,)
     topic: Mapped[str] = mapped_column(String(256))
     creator_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"))
 
