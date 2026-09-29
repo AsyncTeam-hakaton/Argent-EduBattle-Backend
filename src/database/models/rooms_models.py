@@ -28,8 +28,8 @@ class Room(Base):
     __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(BigInteger,primary_key=True)
-    code: Mapped[str] = mapped_column(String(6), unique=True, index=True, default=gen_invite_code,)
-    topic: Mapped[str] = mapped_column(String(256))
+    code: Mapped[str] = mapped_column(String(6), unique=True, index=True, default=gen_invite_code, nullable=True)
+    topic: Mapped[str] = mapped_column(String(256), nullable=True)
     creator_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.max_id"))
 
     status: Mapped[RoomStatus] = mapped_column(
