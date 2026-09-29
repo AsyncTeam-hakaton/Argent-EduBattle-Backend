@@ -98,7 +98,7 @@ async def edit_qualif_questions(questions: list[Question], creator_id: GetTokenD
             detail="Комната не найдена или у вас нет прав на её редактирование"
         )
 
-    update_questions_list = await room_dao.update_quiz_questions(room_id=room.id, questions=questions)
+    update_questions_list = await room_dao.update_qualification_questions(room_id=room.id, questions=questions)
     
     await session.commit()
     return update_questions_list
