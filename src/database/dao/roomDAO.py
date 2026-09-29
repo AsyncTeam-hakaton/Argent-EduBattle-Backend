@@ -2,23 +2,11 @@ from typing import Any
 
 from src.database.dao.baseDAO import BaseDao
 from src.database.models.rooms_models import Room
-from src.schemas.ai_shem import Lecture, Question, RoomFullContent
+from src.schemas.ai_shem import Lecture, Question
 
 
 class RoomDao(BaseDao[Room]):
     model = Room
-
-    async def save_ai_content(self, room_id: int, ai_content: RoomFullContent) -> Room | None:
-
-        content_dict = ai_content.model_dump(mode="json")
-
-        await self.update(
-            filter_by={"id": room_id},
-            lecture=content_dict["lecture"],
-            qualification_questions=content_dict["qualification_questions"],
-            quiz_questions=content_dict["quiz_questions"]
-        )
-        return await self.get_by_id(room_id)
 
     async def update_quiz_questions(
         self, 

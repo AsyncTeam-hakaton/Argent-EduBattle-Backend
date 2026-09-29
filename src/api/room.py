@@ -9,6 +9,7 @@ from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.dao.roomDAO import RoomDao
 from src.database.deps import get_async_session
 from src.database.models.rooms_models import RoomStatus
+from src.schemas.ai_shem import Lecture, Question
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 GetTokenData = Annotated[int, Depends(get_current_user_id)]
@@ -52,4 +53,54 @@ async def start_pendings(topic: str, creator_id: GetTokenData, session: SessionD
     room_dao = RoomDao(session=session)
     await room_dao.update(filter_by={"creator_id": creator_id, "status": RoomStatus.WAITING}, topic=topic, status=RoomStatus.PREPARATION,**content.model_dump())
     await session.commit()
+
+
+@router.patch("/lecture", status_code=status.HTTP_200_OK)
+async def edit_room_lecture(lecture: Lecture, creator_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+
+    room = await room_dao.find_one_or_none(status = RoomStatus.PREPARATION, creator_id=creator_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Комната не найдена или у вас нет прав на её редактирование"
+        )
+
+    update_room = await room_dao.update_lecture(room_id=room.id, lecture=lecture)
+    
+    await session.commit()
+    return update_room
+
+@router.patch("/quiz_questions", status_code=status.HTTP_200_OK)
+async def edit_quiz_questions(questions: list[Question], creator_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+
+    room = await room_dao.find_one_or_none(status = RoomStatus.PREPARATION, creator_id=creator_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Комната не найдена или у вас нет прав на её редактирование"
+        )
+
+    update_questions_list = await room_dao.update_quiz_questions(room_id=room.id, questions=questions)
+    
+    await session.commit()
+    return update_questions_list
+
+@router.patch("/qualif_questions", status_code=status.HTTP_200_OK)
+async def edit_qualif_questions(questions: list[Question], creator_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+
+    room = await room_dao.find_one_or_none(status = RoomStatus.PREPARATION, creator_id=creator_id)
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Комната не найдена или у вас нет прав на её редактирование"
+        )
+
+    update_questions_list = await room_dao.update_quiz_questions(room_id=room.id, questions=questions)
+    
+    await session.commit()
+    return update_questions_list
+
 
