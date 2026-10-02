@@ -2,7 +2,7 @@ from src.database.dao.baseDAO import BaseDao
 from src.database.models.rooms_models import RoomMatch
 
 
-class RoomDao(BaseDao[RoomMatch]):
+class RoomMatchDao(BaseDao[RoomMatch]):
     model = RoomMatch
 
     async def create_room_matches(
@@ -10,7 +10,7 @@ class RoomDao(BaseDao[RoomMatch]):
             room_id: int,
             pairs: list[tuple[int, int]]
     ) -> list[RoomMatch]:
-        matches = [
+        pairs_list = [
             RoomMatch(
                 room_id=room_id,
                 player1_id=p1,
@@ -20,9 +20,9 @@ class RoomDao(BaseDao[RoomMatch]):
             )
             for p1, p2 in pairs
         ]
-        self.session.add_all(matches)
+        self.session.add_all(pairs_list)
         await self.session.flush()
-        return matches
+        return pairs_list
 
     async def save_final_scores(
             self,
