@@ -11,7 +11,7 @@ from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.dao.roomDAO import RoomDao
 from src.database.deps import get_async_session
 from src.database.models.rooms_models import ParticipantStatus, RoomStatus
-from src.redis.match import MatchService
+from src.redis.match import RedisMatchService
 from src.redis.redis import get_redis
 from src.schemas.match import MatchPair, StartMatchRequest
 from src.services.ws_manager import ConnectionManager
@@ -28,7 +28,7 @@ async def init_redis_hash_table(creator_id: GetTokenData, session: SessionDep, r
     room_parti_dao = RoomParticipanDAO(session=session)
     room_dao = RoomDao(session=session)
     room_match_dao = RoomMatchDao(session=session)
-    redis_service = MatchService(redis=redis)
+    redis_service = RedisMatchService(redis=redis)
 
     room = await room_dao.find_one_or_none(creator_id=creator_id, status = RoomStatus.PREPARATION)
     if not room:
@@ -69,3 +69,4 @@ async def init_redis_hash_table(creator_id: GetTokenData, session: SessionDep, r
     )   
     await room_dao.update(filter_by={"id": room.id}, status = RoomStatus.ACTIVE)
     await session.commit()
+
