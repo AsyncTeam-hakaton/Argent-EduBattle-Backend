@@ -14,4 +14,4 @@ class ProcessAnswer(BaseModel):
     room_id: int
     user_id: int
     question_id: int
-    is_correct: bool
+    selected_idx: int

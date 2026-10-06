@@ -65,8 +65,8 @@ async def proc_ans(
             answer_data = ProcessAnswer(
                 room_id=room_id,
                 user_id=user_id,
-                question_id=payload["question_id"],
-                is_correct=payload["is_correct"]
+                question_id=payload.get("question_id"),
+                selected_idx=payload.get("selected_idx"),
             )
 
             result = await redis_manager.process_answer(answer_data=answer_data)
