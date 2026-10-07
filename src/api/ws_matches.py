@@ -1,3 +1,4 @@
+import asyncio
 import random
 from typing import Annotated
 
@@ -13,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from redis import Redis
+from services.quiz_loop import run_quiz_loop
 from src.auth.dependencies import get_current_user_id
 from src.auth.security import decode_access_token
 from src.database.base import async_session_factory
@@ -123,3 +125,11 @@ async def init_redis_hash_table(creator_id: GetTokenData, session: SessionDep, r
     )   
     await room_dao.update(filter_by={"id": room.id}, status = RoomStatus.ACTIVE)
     await session.commit()
+
+    asyncio.create_task(run_quiz_loop(room_id=room.id))
+
+    return {
+        "status": "success", 
+        "message": "Матч инициализирован, цикл вопросов запущен",
+        "room_id": room.id
+    }
