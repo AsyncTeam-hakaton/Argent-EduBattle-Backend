@@ -3,6 +3,7 @@ import logging
 from redis.asyncio import Redis
 
 from src.database.base import async_session_factory
+from src.database.dao.room_matchDAO import RoomMatchDao
 from src.database.dao.roomDAO import RoomDao
 from src.schemas.ai_shem import Question
 from src.schemas.match import ProcessAnswer, StartMatchRequest
@@ -135,3 +136,30 @@ class MatchService:
             "failed_user_id": answer_data.user_id
         }
     }
+
+
+    async def finalize_match(self, room_id: int) -> dict:
+        pairs_key = self._get_pairs_key(room_id=room_id)
+        scores_key = self._get_scores_key(room_id=room_id)
+
+        raw_score: dict = await self.redis.hgetall(scores_key)
+
+        final_scores: dict[int, int] = {
+            int(user_id): int(score)
+            for user_id, score in raw_score.items()
+        }
+
+        async with async_session_factory() as session:
+            match_dao = RoomMatchDao(session=session)
+
+            await match_dao.save_final_scores(room_id=room_id, final_scores=final_scores)
+            await session.commit()
+
+        await self.redis.delete(scores_key, pairs_key)
+
+        return {
+        "event": "FINAL_QUIZ_MATCH",
+        "payload": {
+            "room_id": room_id,
+            }
+        }
