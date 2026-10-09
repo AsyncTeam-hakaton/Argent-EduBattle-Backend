@@ -1,5 +1,6 @@
 import asyncio
 import logging
+
 from pydantic import TypeAdapter
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -50,7 +51,7 @@ async def run_quiz_loop(room_id: int):
 
         await manager.broadcast(room_id=room_id, message=final)
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         logger.error("Ошибка при сохранении результатов комнаты %s в БД: %s", room_id, e)
         return {
         "event": "FINAL_QUIZ_MATCH_DON'T_FINALIZED",
