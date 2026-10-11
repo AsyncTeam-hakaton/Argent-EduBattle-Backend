@@ -71,3 +71,7 @@ async def get_match_res(max_id: GetTokenData, session: SessionDep, room_id: int)
         pairs=pairs_list,
     )
     return room_data
+
+
+@router.get("/quiz_story")
+async def get_quiz_story(max_id: GetTokenData, session: SessionDep):

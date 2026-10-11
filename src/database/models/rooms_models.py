@@ -1,8 +1,9 @@
 import enum
 import secrets
+from datetime import datetime
 from typing import Any
 
-from sqlalchemy import BigInteger, ForeignKey, String
+from sqlalchemy import BigInteger, ForeignKey, String, func
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -41,6 +42,12 @@ class Room(Base):
     lecture: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     qualification_questions: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB, nullable=True)
     quiz_questions: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB, nullable=True)
+
+    max_score: Mapped[int] = mapped_column(default=0, nullable=True, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(),
+        nullable=False
+    )
 
     participants: Mapped[list["RoomParticipant"]] = relationship(back_populates="room")
 

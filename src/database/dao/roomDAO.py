@@ -1,12 +1,25 @@
+from collections.abc import Sequence
 from typing import Any
 
+from sqlalchemy import select
+
 from src.database.dao.baseDAO import BaseDao
-from src.database.models.rooms_models import Room
+from src.database.models.rooms_models import Room, RoomParticipant, RoomStatus
 from src.schemas.ai_shem import Lecture, Question
 
 
 class RoomDao(BaseDao[Room]):
     model = Room
+
+    async def find_users_rooms(self, user_id: int) -> Sequence[Room]:
+        stmt = (
+            select(Room)
+            .join(RoomParticipant, RoomParticipant.room_id == Room.id)
+            .where(Room.status == RoomStatus.FINISHED,
+                   RoomParticipant.user_id == user_id)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
 
     async def update_quiz_questions(
         self, 
