@@ -1,9 +1,22 @@
+from sqlalchemy import or_, select
+
 from src.database.dao.baseDAO import BaseDao
 from src.database.models.rooms_models import RoomMatch
 
 
 class RoomMatchDao(BaseDao[RoomMatch]):
     model = RoomMatch
+
+    async def get_user_score(self, room_id: int, user_id: int) -> RoomMatch | None:
+        stmt = (
+            select(RoomMatch)
+            .where(
+                RoomMatch.room_id == room_id,
+                or_(RoomMatch.player1_id == user_id, RoomMatch.player2_id == user_id),
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
 
     async def create_room_matches(
             self,

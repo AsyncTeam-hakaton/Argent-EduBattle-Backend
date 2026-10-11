@@ -8,12 +8,15 @@ from src.auth.dependencies import get_current_user_id
 from src.database.dao.room_matchDAO import RoomMatchDao
 from src.database.dao.roomDAO import RoomDao
 from src.database.dao.userDAO import UserDao
+from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.deps import get_async_session
+from src.database.models.users_models import UserRole
 from src.schemas.user_schem import (
     AskBody,
     AskResponse,
     PlayersPairs,
     RoomDetailedData,
+    RoomShortData,
     UserData,
 )
 
@@ -73,5 +76,35 @@ async def get_match_res(max_id: GetTokenData, session: SessionDep, room_id: int)
     return room_data
 
 
-@router.get("/quiz_story")
+@router.get("/quiz_story", response_model=list[RoomShortData])
 async def get_quiz_story(max_id: GetTokenData, session: SessionDep):
+    user_dao = UserDao(session=session)
+    room_dao = RoomDao(session=session)
+    match_dao = RoomMatchDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    user = await user_dao.find_one_or_none(max_id = max_id)
+    if user is None:
+        raise HTTPException(404, "user not found")
+
+    if user.role == UserRole.STUDENT:
+        rooms = await room_dao.find_users_rooms(user_id=max_id)
+
+        rooms_data: list[RoomShortData] = []
+        for room in rooms:
+
+            match = await match_dao.get_user_score(user_id=max_id, room_id=room.id)
+            score: int = (match.player1_score if match.player1_id == max_id else match.player2_score) if match else 0
+
+            count = await participant_dao.count_participants_room(room_id=room.id)
+
+            rooms_data.append(RoomShortData(
+                topic=room.topic,
+                date=room.created_at,
+                score= score,
+                max_score=room.max_score,
+                len_students=count,
+            ))
+
+        return rooms_data
+

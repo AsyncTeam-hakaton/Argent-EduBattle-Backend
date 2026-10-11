@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from database.models.users_models import UserRole
@@ -25,3 +27,10 @@ class RoomDetailedData(BaseModel):
     topic: str
     teacher_name: str
     pairs: list[PlayersPairs]
+
+class RoomShortData(BaseModel):
+    topic: str
+    date: datetime
+    score: int | None
+    max_score: int | None
+    len_students: int
