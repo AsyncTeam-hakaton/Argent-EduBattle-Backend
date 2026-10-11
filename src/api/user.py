@@ -44,8 +44,14 @@ async def get_match_res(max_id: GetTokenData, session: SessionDep, room_id: int)
     user_dao = UserDao(session=session)
 
     room = await room_dao.find_one_or_none(room_id = room_id)
-    pairs = await match_dao.find_all(room_id = room_id)
+    if room is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Комната не найдена")
+    
     teacher = await user_dao.find_one_or_none(max_id=room.creator_id)
+    if teacher is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Учитель не найден")
+
+    pairs = await match_dao.find_all(room_id = room_id)
 
     pairs_list: list[PlayersPairs] = []
     for pair in pairs:
