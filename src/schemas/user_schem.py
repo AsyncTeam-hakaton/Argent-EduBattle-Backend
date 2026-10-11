@@ -14,3 +14,14 @@ class  AskBody(BaseModel):
 class AskResponse(BaseModel):
     max_id: int
     response: str
+
+class PlayersPairs(BaseModel):
+    player1_name: str
+    player2_name: str
+    player1_score: int
+    player2_score: int
+
+class RoomDetailedData(BaseModel):
+    topic: str
+    teacher_name: str
+    pairs: list[PlayersPairs]
