@@ -14,7 +14,7 @@ from src.schemas.ai_shem import Lecture, Question
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 GetTokenData = Annotated[int, Depends(get_current_user_id)]
 
-router = APIRouter(prefix="/rooms", tags="Rooms")
+router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 @router.post("/create_room", status_code=status.HTTP_201_CREATED)
 async def create_room(creator_id: GetTokenData, session: SessionDep):

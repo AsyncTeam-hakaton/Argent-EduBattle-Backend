@@ -15,6 +15,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY alembic.ini ./
 COPY src/ ./src
+COPY migrations/ ./migrations
 
 ENV PATH="/app/.venv/bin:$PATH"
 

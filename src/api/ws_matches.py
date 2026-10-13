@@ -14,7 +14,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from redis import Redis
-from services.quiz_loop import run_quiz_loop
 from src.auth.dependencies import get_current_user_id
 from src.auth.security import decode_access_token
 from src.database.base import async_session_factory
@@ -26,6 +25,7 @@ from src.database.models.rooms_models import ParticipantStatus, RoomStatus
 from src.redis.match import MatchService
 from src.redis.redis import get_redis
 from src.schemas.match import MatchPair, ProcessAnswer, StartMatchRequest
+from src.services.quiz_loop import run_quiz_loop
 from src.services.ws_manager import manager
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]

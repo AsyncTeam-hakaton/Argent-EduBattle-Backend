@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.database.base import async_session_factory
 from src.database.dao.roomDAO import RoomDao
 from src.database.models.rooms_models import RoomStatus
-from src.redis.match import MatchService
 from src.redis.redis import get_redis
 from src.schemas.ai_shem import Question
 from src.services.ws_manager import manager
@@ -41,6 +40,7 @@ async def run_quiz_loop(room_id: int):
         await asyncio.sleep(20)
 
     try:
+        from src.redis.match import MatchService
         match_service = MatchService(redis=get_redis())
         final = await match_service.finalize_match(room_id=room_id)
 
