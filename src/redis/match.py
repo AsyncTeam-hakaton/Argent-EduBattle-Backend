@@ -149,9 +149,13 @@ class MatchService:
             for user_id, score in raw_score.items()
         }
 
+        best_scores = max(final_scores.values(), default=0)
+
         async with async_session_factory() as session:
             match_dao = RoomMatchDao(session=session)
+            room_dao = RoomDao(session=session)
 
+            await room_dao.update(filter_by={"id": room_id}, max_score=best_scores)
             await match_dao.save_final_scores(room_id=room_id, final_scores=final_scores)
             await session.commit()
 
