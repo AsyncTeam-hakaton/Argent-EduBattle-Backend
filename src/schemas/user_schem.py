@@ -29,6 +29,7 @@ class RoomDetailedData(BaseModel):
     pairs: list[PlayersPairs]
 
 class RoomShortData(BaseModel):
+    role: UserRole
     topic: str
     date: datetime
     score: int | None

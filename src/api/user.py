@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.ai.service import ai_service
 from src.auth.dependencies import get_current_user_id
 from src.database.dao.room_matchDAO import RoomMatchDao
+from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.dao.roomDAO import RoomDao
 from src.database.dao.userDAO import UserDao
-from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.deps import get_async_session
 from src.database.models.users_models import UserRole
 from src.schemas.user_schem import (
@@ -86,11 +86,11 @@ async def get_quiz_story(max_id: GetTokenData, session: SessionDep):
     user = await user_dao.find_one_or_none(max_id = max_id)
     if user is None:
         raise HTTPException(404, "user not found")
+    
+    rooms = await room_dao.find_users_rooms(user_id=max_id)
+    rooms_data: list[RoomShortData] = []
 
     if user.role == UserRole.STUDENT:
-        rooms = await room_dao.find_users_rooms(user_id=max_id)
-
-        rooms_data: list[RoomShortData] = []
         for room in rooms:
 
             match = await match_dao.get_user_score(user_id=max_id, room_id=room.id)
@@ -99,6 +99,7 @@ async def get_quiz_story(max_id: GetTokenData, session: SessionDep):
             count = await participant_dao.count_participants_room(room_id=room.id)
 
             rooms_data.append(RoomShortData(
+                role=UserRole.STUDENT,
                 topic=room.topic,
                 date=room.created_at,
                 score= score,
@@ -106,5 +107,19 @@ async def get_quiz_story(max_id: GetTokenData, session: SessionDep):
                 len_students=count,
             ))
 
-        return rooms_data
+    elif user.role == UserRole.TEACHER:
+        for room in rooms:
+
+            count = await participant_dao.count_participants_room(room_id=room.id)
+
+            rooms_data.append(RoomShortData(
+                role=UserRole.TEACHER,
+                topic=room.topic,
+                date=room.created_at,
+                score=None,
+                max_score=None,
+                len_students=count
+            ))
+
+    return rooms_data
 
