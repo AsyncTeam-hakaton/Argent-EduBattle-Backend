@@ -5,6 +5,6 @@ token_data = TokenData(user_id=0)
 
 test_token = create_access_token(data=token_data)
 
-print("\nТвой тестовый JWT-токен для Swagger (user_id = 0):")
+print(f"\nТвой тестовый JWT-токен для Swagger (user_id = {token_data.user_id}):")
 print(f"Bearer {test_token}")
 print("\nПросто скопируй строку БЕЗ слова 'Bearer' и вставь в поле Value в Swagger!\n")

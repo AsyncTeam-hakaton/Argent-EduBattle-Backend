@@ -9,7 +9,7 @@ from src.database.dao.room_participantDAO import RoomParticipanDAO
 from src.database.dao.roomDAO import RoomDao
 from src.database.deps import get_async_session
 from src.database.models.rooms_models import RoomStatus
-from src.schemas.ai_shem import Lecture, Question
+from src.schemas.ai_shem import Lecture, Question, RoomFullContent
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 GetTokenData = Annotated[int, Depends(get_current_user_id)]
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/rooms", tags=["Rooms"])
 @router.post("/create_room", status_code=status.HTTP_201_CREATED)
 async def create_room(creator_id: GetTokenData, session: SessionDep):
     room_dao = RoomDao(session=session)
-    room = await room_dao.add(creator_id)
+    room = await room_dao.add(creator_id=creator_id)
     await session.commit()
 
     return room
@@ -46,13 +46,15 @@ async def join_student(max_id: GetTokenData, invite_code: str, session: SessionD
     return participant
 
 
-@router.post("/start_pending", status_code=status.HTTP_201_CREATED)
+@router.post("/start_pending",response_model=RoomFullContent, status_code=status.HTTP_201_CREATED)
 async def start_pendings(topic: str, creator_id: GetTokenData, session: SessionDep):
     content = await ai_service.generate_quiz(topic=topic)
 
     room_dao = RoomDao(session=session)
     await room_dao.update(filter_by={"creator_id": creator_id, "status": RoomStatus.WAITING}, topic=topic, status=RoomStatus.PREPARATION,**content.model_dump())
     await session.commit()
+
+    return content
 
 
 @router.patch("/lecture", status_code=status.HTTP_200_OK)
