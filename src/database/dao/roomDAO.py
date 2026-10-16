@@ -21,6 +21,17 @@ class RoomDao(BaseDao[Room]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def search_active_room_of_creator(self, creator_id: int) -> int | None:
+        stmt = (
+            select(Room.id)
+            .where(
+                Room.creator_id == creator_id,
+                Room.status != RoomStatus.FINISHED,
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def update_quiz_questions(
         self, 
         room_id: int, 

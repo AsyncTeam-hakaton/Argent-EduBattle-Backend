@@ -10,6 +10,13 @@ from src.database.dao.roomDAO import RoomDao
 from src.database.deps import get_async_session
 from src.database.models.rooms_models import RoomStatus
 from src.schemas.ai_shem import Lecture, Question, RoomFullContent
+from src.schemas.room_schem import (
+    LectureResponse,
+    QualificationResponse,
+    QuizResponse,
+    RoomResponse,
+    TopicResponse,
+)
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 GetTokenData = Annotated[int, Depends(get_current_user_id)]
@@ -55,6 +62,99 @@ async def start_pendings(topic: str, creator_id: GetTokenData, session: SessionD
     await session.commit()
 
     return content
+
+
+@router.get("/my_active_room", response_model=RoomResponse)
+async def get_room_id(max_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    role: str = "STUDENT"
+
+    room_id = await participant_dao.search_active_room_of_user(user_id=max_id)
+    if room_id is None:
+        room_id = await room_dao.search_active_room_of_creator(creator_id=max_id)
+        if room_id is None:
+            raise HTTPException(404, "room not found")
+        role = "CREATOR"
+    
+    return RoomResponse(room_id=room_id, your_role=role)
+
+
+@router.get("/{room_id}/lecture", response_model=LectureResponse)
+async def get_lecture(room_id: int, max_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    room = await room_dao.find_one_or_none(id=room_id)
+    if room is None:
+        raise HTTPException(404, "room not found")
+
+    if room.creator_id != max_id:
+        is_member = await participant_dao.find_one_or_none(
+            room_id=room_id, user_id=max_id
+        )
+        if is_member is None:
+            raise HTTPException(403, "no access")
+
+    return LectureResponse(room_id=room.id, lecture=room.lecture)
+
+
+@router.get("/{room_id}/qualif_questions", response_model=QualificationResponse)
+async def get_qualif_questions(room_id: int, max_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    room = await room_dao.find_one_or_none(id=room_id)
+    if room is None:
+        raise HTTPException(404, "room not found")
+
+    if room.creator_id != max_id:
+        is_member = await participant_dao.find_one_or_none(
+            room_id=room_id, user_id=max_id
+        )
+        if is_member is None:
+            raise HTTPException(403, "no access")
+
+    return QualificationResponse(room_id=room.id, qualification_questions=room.qualification_questions)
+
+
+@router.get("/{room_id}/qualif_questions", response_model=QuizResponse)
+async def get_quiz_questions(room_id: int, max_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    room = await room_dao.find_one_or_none(id=room_id)
+    if room is None:
+        raise HTTPException(404, "room not found")
+
+    if room.creator_id != max_id:
+        is_member = await participant_dao.find_one_or_none(
+            room_id=room_id, user_id=max_id
+        )
+        if is_member is None:
+            raise HTTPException(403, "no access")
+
+    return QuizResponse(room_id=room.id, quiz_questions=room.quiz_questions)
+
+
+@router.get("/{room_id}/qualif_questions", response_model=TopicResponse)
+async def get_topic(room_id: int, max_id: GetTokenData, session: SessionDep):
+    room_dao = RoomDao(session=session)
+    participant_dao = RoomParticipanDAO(session=session)
+
+    room = await room_dao.find_one_or_none(id=room_id)
+    if room is None:
+        raise HTTPException(404, "room not found")
+
+    if room.creator_id != max_id:
+        is_member = await participant_dao.find_one_or_none(
+            room_id=room_id, user_id=max_id
+        )
+        if is_member is None:
+            raise HTTPException(403, "no access")
+
+    return TopicResponse(room_id=room.id, topic=room.topic)
 
 
 @router.patch("/lecture", status_code=status.HTTP_200_OK)
